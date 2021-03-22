@@ -1,0 +1,41 @@
+<launch>
+
+  <!-- IF YOU ARE GETTING ANY KIND OF ERROR WHILE RUNNING THIS LAUNCH FILE KINDLY RUN EACH NODE SEPARATELY. -->
+
+
+  <!-- Spawn two UR5 in Gazebo -->
+
+  <include file = "$(find pkg_vb_sim)/launch/task5_simulation.launch" />
+
+  <!-- Launch two move_group nodes for the two UR5 Arms -->
+  <include file="$(find pkg_task5)/launch/two_ur5_move_group.launch" />
+
+
+  <node name="ur5_1" pkg="pkg_task5" type="ur5_1.py" output="screen"/>
+
+  <node name="ur5_2" pkg="pkg_task5" type="ur5_2.py" output="screen"/>
+
+  <node name="node_action_server_ros_iot_bridge" pkg="pkg_ros_iot_bridge" type="node_action_server_ros_iot_bridge.py" output="screen"/>
+
+  <!-- Run RViz with Moveit! Pluging -->
+  <arg name="use_rviz" default="true" />
+
+<!-- Recording Bag File for Submission -->
+  <arg name="record" default="false"/>
+  <arg name="rec_name" default="t5.bag"/>
+
+  <group if="$(arg record)">
+      <node name="rosbag_record_pick" pkg="rosbag" type="record"
+     args="record -O $(find pkg_task5)/bag_files/$(arg rec_name) --chunksize=10 /eyrc/vb/ur5_1/vacuum_gripper/logical_camera/ur5_1 /eyrc/vb/ur5_2/vacuum_gripper/logical_camera/ur5_2" output="screen"/>
+  </group>
+
+
+
+  <group ns="ur5_1">
+
+     <arg name="scene_file" default="$(find pkg_task5)/config/rviz/kiva_Pod.scene" />
+     <node name = "moveit_publish_scene_from_text" pkg= "moveit_ros_planning" type = "moveit_publish_scene_from_text" args= "$(arg scene_file)"/>
+        </group>
+
+
+</launch>
